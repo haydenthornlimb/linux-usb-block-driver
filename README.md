@@ -64,6 +64,18 @@ The implementation supports both sequential access and explicit offsets, allowin
 
 Kernel buffers are dynamically allocated for I/O operations and released after each request. User-space data is transferred using Linux kernel memory-access functions rather than directly dereferencing user-space pointers.
 
+## Testing & Validation
+
+The module was tested using user-space programs that issued IOCTL requests to the character-device interface.
+
+Testing covered:
+
+- Sequential block reads and writes
+- Offset-based reads and writes
+- Multi-block operations
+- Data integrity after write/read cycles
+- Communication between user space and kernel space
+
 ## Technologies & Concepts
 
 - C
