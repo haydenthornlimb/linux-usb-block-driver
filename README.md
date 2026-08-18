@@ -103,4 +103,4 @@ This project provided hands-on experience working with Linux kernel interfaces a
 
 ## Academic Project Notice
 
-This repository documents a project completed as part of Arizona State University coursework. Source code is not publicly included in order to respect course academic-integrity requirements.
+This repository documents a project completed as part of Arizona State University coursework. Some Source code is not publicly included in order to respect course academic-integrity requirements.
