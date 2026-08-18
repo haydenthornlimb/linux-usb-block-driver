@@ -46,6 +46,7 @@ USB Read/Write Layer
         | Linux BIO Requests
         v
 USB Block Device
+'''
 
 ## Technical Implementation
 
