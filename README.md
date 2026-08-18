@@ -16,16 +16,16 @@ The project combines Linux character-device interfaces, IOCTL system calls, user
   - Sequential block writes
   - Offset-based reads
   - Offset-based writes
-- Transfers data safely between user space and kernel space using `copy_from_user()` and `copy_to_user()`
+- Transfers data between user space and kernel space using `copy_from_user()` and `copy_to_user()`
 - Dynamically allocates kernel buffers for I/O requests
 - Opens and accesses USB storage as a Linux block device
 - Creates and submits BIO requests to perform block-level I/O
-- Processes read/write requests in 512-byte sectors
+- Processes individual read/write operations in chunks of up to 512 bytes
 - Supports configurable USB block-device paths
 
 ## Architecture
 
-The project separates the user-facing device interface from the underlying block-device operations.
+The project separates the user-facing character-device interface from the underlying block-device operations.
 
 ```text
 User-Space Application
@@ -50,31 +50,57 @@ USB Block Device
 
 ## Technical Implementation
 
-### Character Device Interface
+### Character Device & IOCTL Interface
 
-The module registers a character device that exposes an IOCTL interface to user-space programs. The IOCTL handler interprets read and write commands, allocates kernel buffers, and transfers data across the user/kernel boundary.
+The [`kmod-ioctl.c`](./kmod-ioctl.c) component registers the character device and exposes an IOCTL interface to user-space applications.
 
-### Block-Level I/O
+The IOCTL handler supports four operations:
 
-USB storage operations are performed through the Linux block I/O subsystem. Requests are divided into sector-sized operations and submitted using BIO structures.
+- `BREAD` — sequential block read
+- `BWRITE` — sequential block write
+- `BREADOFFSET` — block read from a specified offset
+- `BWRITEOFFSET` — block write to a specified offset
 
-The implementation supports both sequential access and explicit offsets, allowing callers to specify where operations should occur on the block device.
+For each request, the module allocates a kernel buffer and uses `copy_from_user()` and `copy_to_user()` to transfer data across the user/kernel boundary.
 
-### Memory Handling
+### USB Block-Level I/O
 
-Kernel buffers are dynamically allocated for I/O operations and released after each request. User-space data is transferred using Linux kernel memory-access functions rather than directly dereferencing user-space pointers.
+The [`kmod-main.c`](./kmod-main.c) component handles communication with the underlying USB block device.
 
-## Testing & Validation
+The module opens a configurable block-device path and processes read and write requests using the Linux BIO subsystem. I/O requests are divided into operations of up to 512 bytes, mapped into BIO structures, and submitted to the block device using `submit_bio_wait()`.
 
-The module was tested using user-space programs that issued IOCTL requests to the character-device interface.
+This provides the lower-level storage interface used by the character-device IOCTL layer.
 
-Testing covered:
+### Request Flow
 
-- Sequential block reads and writes
-- Offset-based reads and writes
-- Multi-block operations
-- Data integrity after write/read cycles
-- Communication between user space and kernel space
+Together, the components provide the following path from a user-space request to the block device:
+
+```text
+User-Space Application
+        |
+        | IOCTL
+        v
+kmod-ioctl.c
+        |
+        | BREAD / BWRITE
+        | BREADOFFSET / BWRITEOFFSET
+        v
+User <-> Kernel Memory Transfer
+        |
+        v
+kmod-main.c
+        |
+        | rw_usb()
+        v
+Linux BIO Subsystem
+        |
+        v
+USB Block Device
+```
+
+### Build System
+
+The included [`Makefile`](./Makefile) builds the kernel module and its associated components using the Linux kernel build system.
 
 ## Technologies & Concepts
 
@@ -91,16 +117,18 @@ Testing covered:
 
 ## What I Learned
 
-This project provided hands-on experience working with Linux kernel interfaces and helped strengthen my understanding of:
+This project provided hands-on experience working with Linux kernel interfaces and strengthened my understanding of:
 
 - The separation between user space and kernel space
 - Character devices and kernel device registration
 - IOCTL-based communication
+- User/kernel memory transfers
 - Block-device architecture
 - Linux BIO request handling
 - Kernel memory allocation and cleanup
 - Low-level storage I/O
+- Modular kernel-level software design
 
 ## Academic Project Notice
 
-This repository documents a project completed as part of Arizona State University coursework. Some Source code is not publicly included in order to respect course academic-integrity requirements.
+This project was completed as part of Operating Systems coursework at Arizona State University. The implementation included in this repository represents my work on the project and is presented as part of my technical portfolio.
