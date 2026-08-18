@@ -46,7 +46,7 @@ USB Read/Write Layer
         | Linux BIO Requests
         v
 USB Block Device
-'''
+```
 
 ## Technical Implementation
 
@@ -77,18 +77,18 @@ Kernel buffers are dynamically allocated for I/O operations and released after e
 - User/Kernel Memory Management
 - Low-Level I/O
 
-What I Learned
+## What I Learned
 
 This project provided hands-on experience working with Linux kernel interfaces and helped strengthen my understanding of:
 
-The separation between user space and kernel space
-Character devices and kernel device registration
-IOCTL-based communication
-Block-device architecture
-Linux BIO request handling
-Kernel memory allocation and cleanup
-Low-level storage I/O
+- The separation between user space and kernel space
+- Character devices and kernel device registration
+- IOCTL-based communication
+- Block-device architecture
+- Linux BIO request handling
+- Kernel memory allocation and cleanup
+- Low-level storage I/O
 
-Academic Project Notice
+## Academic Project Notice
 
 This repository documents a project completed as part of Arizona State University coursework. Source code is not publicly included in order to respect course academic-integrity requirements.
